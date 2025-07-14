@@ -16,14 +16,27 @@ import {
   AlertCircle,
   CheckCircle,
   Download,
-  Trash2
+  Trash2,
+  Cloud
 } from 'lucide-react';
 import { DatabaseConfig } from '@/components/DatabaseConfig';
 import { ScheduleConfig } from '@/components/ScheduleConfig';
 import { DestinationConfig } from '@/components/DestinationConfig';
+import { CloudConfig } from '@/components/CloudConfig';
 import { ServiceControls } from '@/components/ServiceControls';
 import { LogsViewer } from '@/components/LogsViewer';
 import { useToast } from '@/hooks/use-toast';
+
+interface CloudConfiguration {
+  id: string;
+  clientName: string;
+  document: string;
+  employeeName: string;
+  employeePhone: string;
+  backupWebhook: string;
+  notificationWebhook: string;
+  enabled: boolean;
+}
 
 interface AppConfig {
   databases: Array<{
@@ -44,6 +57,7 @@ interface AppConfig {
     path: string;
     compress: boolean;
   }>;
+  cloudConfigurations: CloudConfiguration[];
 }
 
 const Index = () => {
@@ -51,7 +65,8 @@ const Index = () => {
   const [config, setConfig] = useState<AppConfig>({
     databases: [],
     schedules: [],
-    destinations: []
+    destinations: [],
+    cloudConfigurations: []
   });
   const [serviceStatus, setServiceStatus] = useState('Parado');
   const [lastBackup, setLastBackup] = useState<string | null>(null);
@@ -60,7 +75,12 @@ const Index = () => {
   useEffect(() => {
     const savedConfig = localStorage.getItem('g2-backup-config');
     if (savedConfig) {
-      setConfig(JSON.parse(savedConfig));
+      const parsedConfig = JSON.parse(savedConfig);
+      // Garantir que cloudConfigurations existe
+      if (!parsedConfig.cloudConfigurations) {
+        parsedConfig.cloudConfigurations = [];
+      }
+      setConfig(parsedConfig);
     }
     
     // Simular status do serviço
@@ -134,7 +154,7 @@ const Index = () => {
 
       <div className="container mx-auto px-6 py-6">
         {/* Dashboard Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+        <div className="grid grid-cols-1 md:grid-cols-5 gap-6 mb-8">
           <Card className="bg-gray-800/50 border-gray-700">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium text-gray-300">Bancos Cadastrados</CardTitle>
@@ -167,6 +187,16 @@ const Index = () => {
 
           <Card className="bg-gray-800/50 border-gray-700">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium text-gray-300">Backup em Nuvem</CardTitle>
+              <Cloud className="h-4 w-4 text-cyan-400" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold text-white">{config.cloudConfigurations.length}</div>
+            </CardContent>
+          </Card>
+
+          <Card className="bg-gray-800/50 border-gray-700">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium text-gray-300">Último Backup</CardTitle>
               <Download className="h-4 w-4 text-orange-400" />
             </CardHeader>
@@ -191,7 +221,7 @@ const Index = () => {
               </CardHeader>
               <CardContent>
                 <Tabs defaultValue="databases" className="w-full">
-                  <TabsList className="grid w-full grid-cols-3 bg-gray-700">
+                  <TabsList className="grid w-full grid-cols-4 bg-gray-700">
                     <TabsTrigger value="databases" className="data-[state=active]:bg-blue-600">
                       Bancos de Dados
                     </TabsTrigger>
@@ -200,6 +230,9 @@ const Index = () => {
                     </TabsTrigger>
                     <TabsTrigger value="destinations" className="data-[state=active]:bg-blue-600">
                       Destinos
+                    </TabsTrigger>
+                    <TabsTrigger value="cloud" className="data-[state=active]:bg-blue-600">
+                      Nuvem
                     </TabsTrigger>
                   </TabsList>
 
@@ -221,6 +254,13 @@ const Index = () => {
                     <DestinationConfig 
                       destinations={config.destinations}
                       onUpdate={(destinations) => saveConfig({ ...config, destinations })}
+                    />
+                  </TabsContent>
+
+                  <TabsContent value="cloud" className="mt-6">
+                    <CloudConfig 
+                      configurations={config.cloudConfigurations}
+                      onUpdate={(cloudConfigurations) => saveConfig({ ...config, cloudConfigurations })}
                     />
                   </TabsContent>
                 </Tabs>
