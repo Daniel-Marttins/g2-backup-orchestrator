@@ -11,6 +11,7 @@ import { useToast } from '@/hooks/use-toast';
 interface DatabaseItem {
   id: string;
   server: string;
+  port: string;
   database: string;
   username: string;
   password: string;
@@ -27,6 +28,7 @@ export const DatabaseConfig: React.FC<DatabaseConfigProps> = ({ databases, onUpd
   const [editingId, setEditingId] = useState<string | null>(null);
   const [formData, setFormData] = useState({
     server: '',
+    port: '1433',
     database: '',
     username: '',
     password: ''
@@ -35,6 +37,7 @@ export const DatabaseConfig: React.FC<DatabaseConfigProps> = ({ databases, onUpd
   const resetForm = () => {
     setFormData({
       server: '',
+      port: '1433',
       database: '',
       username: '',
       password: ''
@@ -84,6 +87,7 @@ export const DatabaseConfig: React.FC<DatabaseConfigProps> = ({ databases, onUpd
   const handleEdit = (database: DatabaseItem) => {
     setFormData({
       server: database.server,
+      port: database.port,
       database: database.database,
       username: database.username,
       password: database.password
@@ -125,6 +129,17 @@ export const DatabaseConfig: React.FC<DatabaseConfigProps> = ({ databases, onUpd
                   value={formData.server}
                   onChange={(e) => setFormData({ ...formData, server: e.target.value })}
                   placeholder="localhost\SQLEXPRESS"
+                  className="bg-gray-700 border-gray-600 text-white"
+                />
+              </div>
+              
+              <div>
+                <Label htmlFor="port" className="text-gray-300">Porta</Label>
+                <Input
+                  id="port"
+                  value={formData.port}
+                  onChange={(e) => setFormData({ ...formData, port: e.target.value })}
+                  placeholder="1433"
                   className="bg-gray-700 border-gray-600 text-white"
                 />
               </div>
@@ -203,7 +218,7 @@ export const DatabaseConfig: React.FC<DatabaseConfigProps> = ({ databases, onUpd
                     </div>
                     <div>
                       <h4 className="font-medium text-white">{database.database}</h4>
-                      <p className="text-sm text-gray-400">{database.server}</p>
+                      <p className="text-sm text-gray-400">{database.server}:{database.port}</p>
                       <p className="text-xs text-gray-500">Usuário: {database.username}</p>
                     </div>
                   </div>
