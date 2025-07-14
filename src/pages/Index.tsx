@@ -29,6 +29,7 @@ interface AppConfig {
   databases: Array<{
     id: string;
     server: string;
+    port: string;
     database: string;
     username: string;
     password: string;
